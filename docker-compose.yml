@@ -1,0 +1,63 @@
+version: '3.7'
+
+services:
+
+  db:
+    image: mysql:5.7
+    container_name: oc3.x-salesman-db-dev
+    restart: unless-stopped
+    ports:
+      - "53001:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: opencart
+    volumes:
+      - oc3.x-salesman-module:/var/lib/mysql
+    networks:
+      - oc3.x-salesman-network
+
+  backend:
+    build:
+      context: ./.env/php/
+    container_name: oc3.x-salesman-backend-dev
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:172.60.1.1"
+      - "host.docker.localhost:host-gateway"
+    depends_on: 
+      - db
+    volumes:
+      - ./logs/php_errors.log:/var/log/php_errors.log
+      - ./ocStore3.x/:/var/www/html/
+      - ./src/admin/controller/extension/module/salesman.php:/var/www/html/admin/controller/extension/module/salesman.php
+      - ./src/catalog/controller/extension/module/salesman.php:/var/www/html/catalog/controller/extension/module/salesman.php
+      - ./src/admin/language/ru-ru/extension/module/salesman.php:/var/www/html/admin/language/ru-ru/extension/module/salesman.php
+      - ./src/admin/view/template/extension/module/salesman.twig:/var/www/html/admin/view/template/extension/module/salesman.twig
+      - ./src/system/library/SalesmanClient.php:/var/www/html/system/library/SalesmanClient.php
+    networks:
+      - oc3.x-salesman-network
+
+  webserver:
+    build:
+      context: ./.env/apache2/
+    container_name: oc3.x-salesman-webserver-dev
+    restart: unless-stopped
+    depends_on: 
+      - backend
+    volumes:
+      - ./logs/:/var/www/html/logs/
+      - ./ocStore3.x/:/var/www/html/
+    networks:
+      oc3.x-salesman-network:
+        ipv4_address: 172.60.1.4
+
+networks:
+  oc3.x-salesman-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.60.1.1/24
+
+volumes:
+  oc3.x-salesman-module:
