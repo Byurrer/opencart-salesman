@@ -36,6 +36,9 @@ class SalesmanClient
         $response = $this->send('client', array_merge(["action" => "add"], $client));
 
         if (isset($response['error'])) {
+            if (isset($response['exists'])) {
+                return $response['exists'];
+            }
             throw new \Exception($response['error']['text'], $response['error']['code']);
         }
         
@@ -85,8 +88,8 @@ class SalesmanClient
             ]
         );
 
-        if (isset($response['data']) && isset($response['data']['clid'])) {
-            return $response['data']['clid'];
+        if (isset($response['data']) && $response['data']) {
+            return $response['data'][0]['clid'];
         }
 
         return null;

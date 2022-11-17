@@ -55,7 +55,8 @@ class ControllerExtensionModuleSalesman extends Controller
             }
         } else {
             try {
-                $clid = $this->SalesmanClient->searchClientClid($order['customer_id']);
+                $contact = $order['telephone'] ? $order['telephone'] : $order['email'];
+                $clid = $this->SalesmanClient->searchClientClid($contact);
             } catch (\Exception $e) {
                 $this->log->write($e->__toString());
                 return;
