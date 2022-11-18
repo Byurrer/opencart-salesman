@@ -92,19 +92,26 @@ class ControllerExtensionModuleSalesman extends Controller
             }
         }
 
+        $address = sprintf(
+            "%s%s, %s, %s, %s%s",
+            ($order['shipping_postcode'] ? $order['shipping_postcode'] . ' ' : ''),
+            $order['shipping_country'],
+            $order['shipping_zone'],
+            $order['shipping_city'],
+            $order['shipping_address_1'],
+            (
+                $order['shipping_address_2']
+                ? sprintf(" (%s)", $order['shipping_address_2'])
+                : $order['shipping_address_2']
+            )
+        );
+
         // сделка
         $deal = [
             'uid' => $orderId,
             'title' => 'Заказ с сайта #' . $orderId,
             'clid' => $clid,
-            'adres' => sprintf(
-                "(%s) %s, %s, %s, %s",
-                $order['shipping_postcode'],
-                $order['shipping_country'],
-                $order['shipping_zone'],
-                $order['shipping_city'],
-                $order['shipping_address_1']
-            ),
+            'adres' => $address,
             'speka' => $items
         ];
 
