@@ -44,7 +44,7 @@ class ControllerExtensionModuleSalesman extends Controller
         $this->load->model('checkout/order');
         $order = $this->model_checkout_order->getOrder($orderId);
 
-        // поиск идентфикиатора клиента в CRM
+        // поиск идентификатора клиента в CRM
         $clid = null;
         if ($order['customer_id'] > 0) {
             try {
@@ -64,7 +64,7 @@ class ControllerExtensionModuleSalesman extends Controller
         }
 
         if (!$clid) {
-            $clid = $this->newCustomer($order, sprintf("-%s", $orderId));
+            $clid = $this->newCustomerFromOrder($order, sprintf("-%s", $orderId));
         }
 
         // спецификация
@@ -129,8 +129,13 @@ class ControllerExtensionModuleSalesman extends Controller
             return;
         }
 
+        $this->load->model('account/customer');
+        $this->load->model('account/address');
+        $customer = $this->model_account_customer->getCustomer($customerId);
+        $address = $this->model_account_address->getAddress($customer['address_id']);
+
         try {
-            $this->newCustomer($args[0], $customerId);
+            $this->newCustomer($customer, ($address ? $address : null));
         } catch (\Exception $e) {
             $this->log->write($e->__toString());
         }
@@ -153,24 +158,82 @@ class ControllerExtensionModuleSalesman extends Controller
     }
 
     /**
-     * Добавить пользователя в CRM
+     * Добавить пользователя в CRM из заказа
      *
      * @throws \Exception
      *
-     * @param array $cusomer
+     * @param array $order
      * @param string|null $customerId
      * @return string
      */
-    private function newCustomer(array $cusomer, ?string $customerId): string
+    private function newCustomerFromOrder(array $order, ?string $customerId): string
     {
+        $address = sprintf(
+            "%s%s, %s, %s, %s%s",
+            ($order['shipping_postcode'] ? $order['shipping_postcode'] . ' ' : ''),
+            $order['shipping_country'],
+            $order['shipping_zone'],
+            $order['shipping_city'],
+            $order['shipping_address_1'],
+            (
+                $order['shipping_address_2']
+                ? sprintf(" (%s)", $order['shipping_address_2'])
+                : $order['shipping_address_2']
+            )
+        );
         $client = [
-            'title' => $cusomer['lastname'] . ' ' . $cusomer['firstname'],
-            'phone' => $cusomer['telephone'],
-            'mail_url' => $cusomer['email'],
+            'title' => $order['lastname'] . ' ' . $order['firstname'],
+            'type' => 'person',
+            'address' => $address,
+            'phone' => $order['telephone'],
+            'mail_url' => $order['email'],
             "clientpath" => $_SERVER['HTTP_HOST']
         ];
 
         $client['uid'] = ($customerId ? $customerId : '0');
+
+        $clid = $this->SalesmanClient->newClient($client);
+
+        return $clid;
+    }
+
+    /**
+     * Добавить пользователя в CRM
+     *
+     * @throws \Exception
+     *
+     * @param array $customer
+     * @param array|null $address
+     * @return string
+     */
+    private function newCustomer(array $customer, array $address = null): string
+    {
+        $addressStr = '';
+        if ($address) {
+            $addressStr = sprintf(
+                "%s%s, %s, %s, %s%s",
+                ($customer['postcode'] ? $customer['postcode'] . ' ' : ''),
+                $customer['country'],
+                $customer['zone'],
+                $customer['city'],
+                $customer['address_1'],
+                (
+                    $customer['address_2']
+                    ? sprintf(" (%s)", $customer['address_2'])
+                    : $customer['address_2']
+                )
+            );
+        }
+
+        $client = [
+            'title' => $customer['lastname'] . ' ' . $customer['firstname'],
+            'type' => 'person',
+            'uid' => $customer['customer_id'],
+            'address' => $addressStr,
+            'phone' => $customer['telephone'],
+            'mail_url' => $customer['email'],
+            "clientpath" => $_SERVER['HTTP_HOST']
+        ];
 
         $clid = $this->SalesmanClient->newClient($client);
 

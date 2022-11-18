@@ -260,7 +260,7 @@ class ControllerExtensionModuleSalesman extends Controller
     //######################################################################
 
     /**
-     * Обработчик события после добавления нового пользрвателя из админки
+     * Обработчик события после добавления нового пользователя из админки
      *
      * @param string $route
      * @param array $args
@@ -273,12 +273,35 @@ class ControllerExtensionModuleSalesman extends Controller
             return;
         }
 
-        $cusomer = $args[0];
+        $this->load->model('customer/customer');
+        $customer = $this->model_customer_customer->getCustomer($customerId);
+        
+        $address = '';
+        if ($customer['address_id']) {
+            if ($addressCustomer = $this->model_customer_customer->getAddress($customer['address_id'])) {
+                $address = sprintf(
+                    "%s%s, %s, %s, %s%s",
+                    ($addressCustomer['postcode'] ? $addressCustomer['postcode'] . ' ' : ''),
+                    $addressCustomer['country'],
+                    $addressCustomer['zone'],
+                    $addressCustomer['city'],
+                    $addressCustomer['address_1'],
+                    (
+                        $addressCustomer['address_2']
+                        ? sprintf(" (%s)", $addressCustomer['address_2'])
+                        : $addressCustomer['address_2']
+                    )
+                );
+            }
+        }
+
         $client = [
             'uid' => $customerId,
-            'title' => $cusomer['lastname'] . ' ' . $cusomer['firstname'],
-            'phone' => $cusomer['telephone'],
-            'mail_url' => $cusomer['email'],
+            'title' => $customer['lastname'] . ' ' . $customer['firstname'],
+            'type' => 'person',
+            'address' => $address,
+            'phone' => $customer['telephone'],
+            'mail_url' => $customer['email'],
             "clientpath" => $_SERVER['HTTP_HOST']
         ];
 
