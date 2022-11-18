@@ -132,6 +132,18 @@ class ControllerExtensionModuleSalesman extends Controller
         $this->load->model('account/customer');
         $this->load->model('account/address');
         $customer = $this->model_account_customer->getCustomer($customerId);
+
+        // проверка наличия контакта в Salesman
+        try {
+            $contact = $customer['telephone'] ? $customer['telephone'] : $customer['email'];
+            if ($this->SalesmanClient->searchClientClid($contact)) {
+                return;
+            }
+        } catch (\Exception $e) {
+            $this->log->write($e->__toString());
+            return;
+        }
+
         $address = $this->model_account_address->getAddress($customer['address_id']);
 
         try {

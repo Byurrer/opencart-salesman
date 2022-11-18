@@ -79,6 +79,8 @@ class SalesmanClient
      */
     public function searchClientClid(string $contact): ?string
     {
+        // убираем + в начале контакта, иначе не найти контакт в salesman
+        $contact = trim($contact, '+ \t\n\r\0\x0B');
         $response = $this->send(
             'client',
             [
