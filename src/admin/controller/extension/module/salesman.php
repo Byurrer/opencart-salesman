@@ -31,12 +31,17 @@ class ControllerExtensionModuleSalesman extends Controller
 
         // сборка данных страницы
         $data = array_merge(
+            $lang,
             $this->getTemplateData(),
             $this->getFormData(),
             $this->getSettingsData(),
-            $this->getStatusData(),
-            $lang
+            $this->getStatusData()
         );
+
+        if ($this->request->server['REQUEST_METHOD'] == 'POST') {
+            unset($this->session->data['settings_success']);
+            unset($this->session->data['settings_error']);
+        }
 
         $this->response->setOutput($this->load->view('extension/module/salesman', $data));
     }
@@ -74,15 +79,13 @@ class ControllerExtensionModuleSalesman extends Controller
             )
         ];
         $data['breadcrumbs'][] = [
-            'text' => $this->language->get('heading_title'),
+            'text' => $this->language->get('heading_title_m'),
             'href' => $this->url->link(
                 'extension/module/salesman',
                 'token=' . $this->session->data['token'],
                 true
             )
         ];
-
-        // $data = $this->language->load()
 
         return $data;
     }
@@ -134,15 +137,15 @@ class ControllerExtensionModuleSalesman extends Controller
         // если было успешное изменение настроек - показываем сообщение
         if (isset($this->session->data['settings_success'])) {
             $data['settings_success'] = $this->language->get('settings_success');
-            unset($this->session->data["settings_success"]);
+            unset($this->session->data['settings_success']);
         } else {
             $data['settings_success'] = false;
         }
 
         // если есть ошибки - показываем
         if (isset($this->session->data['settings_error'])) {
-            $data['error_warning'] = implode("<br/>", $this->session->data["settings_error"]);
-            unset($this->session->data["settings_error"]);
+            $data['error_warning'] = implode('<br/>', $this->session->data['settings_error']);
+            unset($this->session->data['settings_error']);
         } else {
             $data['error_warning'] = false;
         }
@@ -326,7 +329,7 @@ class ControllerExtensionModuleSalesman extends Controller
             'address' => $address,
             'phone' => $customer['telephone'],
             'mail_url' => $customer['email'],
-            "clientpath" => $_SERVER['HTTP_HOST']
+            'clientpath' => $_SERVER['HTTP_HOST']
         ];
 
         $this->SalesmanClient->newClient($client);
@@ -352,7 +355,7 @@ class ControllerExtensionModuleSalesman extends Controller
      */
     private function isEnableModule(): bool
     {
-        $settings = $this->model_setting_setting->getSetting("module_salesman");
+        $settings = $this->model_setting_setting->getSetting('module_salesman');
 
         return boolval($settings['module_salesman_status']);
     }

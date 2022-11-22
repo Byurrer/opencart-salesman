@@ -17,13 +17,13 @@
 
   <div class="container-fluid">
     <?php if ($error_warning) { ?>
-  <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> <?php echo $error_warning; ?>
-    <button type="button" class="close" data-dismiss="alert">&times;</button>
-  </div>
-  <?php } ?>
+    <div class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> <?php echo $error_warning; ?>
+      <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+    <?php } ?>
 
   <?php if ($settings_success) { ?>
-  <div class="alert alert-success alert-dismissible"><i class="fa fa-exclamation-circle"></i> <?php echo $settings_success ?></div>
+    <div class="alert alert-success alert-dismissible"><i class="fa fa-exclamation-circle"></i> <?php echo $settings_success ?></div>
   <?php } ?>
 
   <div class="panel panel-default">
