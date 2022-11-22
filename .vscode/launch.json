@@ -5,7 +5,7 @@
             "name": "Listen for Xdebug",
             "type": "php",
             "request": "launch",
-            "hostname": "172.60.1.1",
+            "hostname": "172.60.3.1",
             "port": 9003,
             "log": true,
             "pathMappings": {

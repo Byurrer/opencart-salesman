@@ -22,7 +22,7 @@ class ControllerExtensionModuleSalesman extends Controller
      */
     public function index()
     {
-        $this->load->language('extension/module/salesman');
+        $lang = $this->load->language('extension/module/salesman');
         $this->document->setTitle($this->language->get('doc_title'));
 
         if ($this->request->server['REQUEST_METHOD'] == 'POST') {
@@ -34,7 +34,8 @@ class ControllerExtensionModuleSalesman extends Controller
             $this->getTemplateData(),
             $this->getFormData(),
             $this->getSettingsData(),
-            $this->getStatusData()
+            $this->getStatusData(),
+            $lang
         );
 
         $this->response->setOutput($this->load->view('extension/module/salesman', $data));
@@ -60,7 +61,7 @@ class ControllerExtensionModuleSalesman extends Controller
             'text' => $this->language->get('text_home'),
             'href' => $this->url->link(
                 'common/dashboard',
-                'user_token=' . $this->session->data['user_token'],
+                'token=' . $this->session->data['token'],
                 true
             )
         ];
@@ -68,7 +69,7 @@ class ControllerExtensionModuleSalesman extends Controller
             'text' => $this->language->get('text_extension'),
             'href' => $this->url->link(
                 'marketplace/extension',
-                'user_token=' . $this->session->data['user_token'] . '&type=module',
+                'token=' . $this->session->data['token'] . '&type=module',
                 true
             )
         ];
@@ -76,10 +77,12 @@ class ControllerExtensionModuleSalesman extends Controller
             'text' => $this->language->get('heading_title'),
             'href' => $this->url->link(
                 'extension/module/salesman',
-                'user_token=' . $this->session->data['user_token'],
+                'token=' . $this->session->data['token'],
                 true
             )
         ];
+
+        // $data = $this->language->load()
 
         return $data;
     }
@@ -96,12 +99,12 @@ class ControllerExtensionModuleSalesman extends Controller
         $data['settings_edit'] = $this->language->get('settings_edit');
         $data['action'] = $this->url->link(
             'extension/module/salesman',
-            'user_token=' . $this->session->data['user_token'],
+            'token=' . $this->session->data['token'],
             true
         );
         $data['cancel'] = $this->url->link(
             'marketplace/extension',
-            'user_token=' . $this->session->data['user_token'] . '&type=module',
+            'token=' . $this->session->data['token'] . '&type=module',
             true
         );
 
@@ -205,7 +208,7 @@ class ControllerExtensionModuleSalesman extends Controller
             $this->response->redirect(
                 $this->url->link(
                     'extension/module/salesman',
-                    'user_token=' . $this->session->data['user_token'],
+                    'token=' . $this->session->data['token'],
                     true
                 )
             );
@@ -225,21 +228,28 @@ class ControllerExtensionModuleSalesman extends Controller
      */
     public function install()
     {
-        $this->load->model('setting/event');
+        $this->load->model('setting/setting');
+        $this->model_setting_setting->editSetting('module_salesman', [
+            'module_salesman_status' => '',
+            'module_salesman_api_url' => '',
+            'module_salesman_api_login' => '',
+            'module_salesman_api_token' => '',
+        ]);
 
-        $this->model_setting_event->addEvent(
+        $this->load->model('extension/event');
+        $this->model_extension_event->addEvent(
             'salesman',
             'admin/model/customer/customer/addCustomer/after',
             'extension/module/salesman/eventAddCustomerAfter'
         );
 
-        $this->model_setting_event->addEvent(
+        $this->model_extension_event->addEvent(
             'salesman',
             'catalog/model/account/customer/addCustomer/after',
             'extension/module/salesman/eventAddCustomerAfter'
         );
 
-        $this->model_setting_event->addEvent(
+        $this->model_extension_event->addEvent(
             'salesman',
             'catalog/model/checkout/order/addOrderHistory/after',
             'extension/module/salesman/eventAddOrderHistoryAfter'
@@ -253,8 +263,11 @@ class ControllerExtensionModuleSalesman extends Controller
      */
     public function uninstall()
     {
-        $this->load->model('setting/event');
-        $this->model_setting_event->deleteEventByCode('salesman');
+        $this->load->model('setting/setting');
+        $this->model_setting_setting->deleteSetting('module_salesman');
+		
+		$this->load->model('extension/event');
+        $this->model_extension_event->deleteEvent('salesman');
     }
 
     //######################################################################

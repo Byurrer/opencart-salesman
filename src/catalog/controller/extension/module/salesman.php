@@ -68,7 +68,8 @@ class ControllerExtensionModuleSalesman extends Controller
         }
 
         // спецификация
-        $orderItems = $this->model_checkout_order->getOrderProducts($orderId);
+        $this->load->model('account/order');
+        $orderItems = $this->model_account_order->getOrderProducts($orderId);
         $items = [];
         foreach ($orderItems as $item) {
             $items[] = [
@@ -80,7 +81,7 @@ class ControllerExtensionModuleSalesman extends Controller
             ];
         }
 
-        $orderTotals = $this->model_checkout_order->getOrderTotals($orderId);
+        $orderTotals = $this->model_account_order->getOrderTotals($orderId);
         foreach ($orderTotals as $total) {
             if ($total['code'] == 'shipping') {
                 $items[] = [
