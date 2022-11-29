@@ -353,7 +353,7 @@ class ControllerExtensionModuleSalesman extends Controller
      *
      * @return boolean
      */
-    private function isEnableModule(): bool
+    private function isEnableModule()
     {
         $settings = $this->model_setting_setting->getSetting('module_salesman');
 

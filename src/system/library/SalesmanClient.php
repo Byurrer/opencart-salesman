@@ -31,7 +31,7 @@ class SalesmanClient
      * @param array $client данные клиента
      * @return string
      */
-    public function newClient(array $client): string
+    public function newClient($client)
     {
         $response = $this->send('client', array_merge(["action" => "add"], $client));
 
@@ -53,7 +53,7 @@ class SalesmanClient
      * @param string $uid идентификатор пользователя в opencart
      * @return string|null
      */
-    public function getClientClid(string $uid): ?string
+    public function getClientClid($uid)
     {
         $response = $this->send(
             'client',
@@ -77,7 +77,7 @@ class SalesmanClient
      * @param string $contact
      * @return string|null
      */
-    public function searchClientClid(string $contact): ?string
+    public function searchClientClid($contact)
     {
         // убираем + в начале контакта, иначе не найти контакт в salesman
         $contact = trim($contact, '+ \t\n\r\0\x0B');
@@ -107,7 +107,7 @@ class SalesmanClient
      * @param array $deal данные сделки
      * @return void
      */
-    public function newDeal(array $deal): void
+    public function newDeal($deal)
     {
         $response = $this->send('deal', array_merge(["action" => "add"], $deal));
     }
@@ -120,7 +120,7 @@ class SalesmanClient
      * @param string $uid идентификатор заказа в opencart
      * @return boolean
      */
-    public function existsDeal(string $uid): bool
+    public function existsDeal($uid)
     {
         $response = $this->send(
             'deal',
@@ -145,7 +145,7 @@ class SalesmanClient
      * @param string $token
      * @return boolean
      */
-    public function test(string $url, string $login, string $token): bool
+    public function test($url, $login, $token)
     {
         $response = $this->send('client', ["action" => "fields"], $url, $login, $token);
 
@@ -176,7 +176,7 @@ class SalesmanClient
      * @param string|null $token
      * @return array
      */
-    protected function send(string $part, array $data, string $url = null, string $login = null, string $token = null): array
+    protected function send($part, $data, $url = null, $login = null, $token = null)
     {
         if (!$url) {
             $url = $this->url;

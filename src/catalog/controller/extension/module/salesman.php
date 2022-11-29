@@ -186,7 +186,7 @@ class ControllerExtensionModuleSalesman extends Controller
      * @param string|null $customerId
      * @return string
      */
-    private function newCustomerFromOrder(array $order, ?string $customerId): string
+    private function newCustomerFromOrder($order, $customerId = null)
     {
         $address = sprintf(
             "%s%s, %s, %s, %s%s",
@@ -226,7 +226,7 @@ class ControllerExtensionModuleSalesman extends Controller
      * @param array|null $address
      * @return string
      */
-    private function newCustomer(array $customer, array $address = null): string
+    private function newCustomer($customer, $address = null)
     {
         $addressStr = '';
         if ($address) {
